@@ -80,7 +80,7 @@ function App() {
 
   function handleCitySearch(city) {
     const apiKey = '46a1839dbee718dbcb24720d9dd3d561';
-    setIsLoading(true); // Start loading state
+    setIsLoading(true);
 
     getWeatherByCity(city, apiKey, units)
       .then((response) => {
@@ -114,11 +114,11 @@ function App() {
             setBgClass('');
         }
 
-        setIsLoading(false); // Stop loading state
+        setIsLoading(false);
       })
       .catch((error) => {
         console.log(error);
-        setIsLoading(false); // Stop loading state
+        setIsLoading(false);
       });
   }
   return (
