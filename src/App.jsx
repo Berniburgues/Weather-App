@@ -21,6 +21,9 @@ function getWeather(lat, lon, apiKey, units) {
 function celsiusToFahrenheit(tempCelsius) {
   return (tempCelsius * 9) / 5 + 32;
 }
+function fahrenheitToCelsius(tempFahrenheit) {
+  return ((tempFahrenheit - 32) * 5) / 9;
+}
 
 function App() {
   const [weatherData, setWeatherData] = useState({
@@ -32,9 +35,15 @@ function App() {
   const [units, setUnits] = useState('metric');
   const [isLoading, setIsLoading] = useState(true);
   const [bgClass, setBgClass] = useState('');
+  const [lastCity, setLastCity] = useState('');
 
   useEffect(() => {
     const apiKey = '46a1839dbee718dbcb24720d9dd3d561';
+
+    getWeatherByCurrentLocation(apiKey, units);
+  }, []);
+
+  function getWeatherByCurrentLocation(apiKey, units) {
     navigator.geolocation.getCurrentPosition((position) => {
       const lat = position.coords.latitude;
       const lon = position.coords.longitude;
@@ -72,7 +81,7 @@ function App() {
         }
       });
     });
-  }, [units]);
+  }
 
   function handleToggleUnits() {
     setUnits(units === 'metric' ? 'imperial' : 'metric');
@@ -82,13 +91,19 @@ function App() {
     const apiKey = '46a1839dbee718dbcb24720d9dd3d561';
     setIsLoading(true);
 
+    if (city === lastCity) {
+      setIsLoading(false);
+      return;
+    }
+
     getWeatherByCity(city, apiKey, units)
       .then((response) => {
-        const tempCelsius = response.data.main.temp;
-        const temperature =
-          units === 'imperial' ? celsiusToFahrenheit(tempCelsius) : tempCelsius;
+        let temp = response.data.main.temp;
+        if (units === 'imperial') {
+          temp = fahrenheitToCelsius(temp);
+        }
         setWeatherData({
-          temperature: temperature,
+          temperature: temp,
           description: response.data.weather[0].description,
           icon: response.data.weather[0].icon,
           location: `${response.data.name}, ${response.data.sys.country}`,
@@ -114,6 +129,7 @@ function App() {
             setBgClass('');
         }
 
+        setLastCity(city);
         setIsLoading(false);
       })
       .catch((error) => {
@@ -121,6 +137,7 @@ function App() {
         setIsLoading(false);
       });
   }
+
   return (
     <div
       className={`bg-gray-100 min-h-screen flex items-center justify-center ${bgClass}`}
